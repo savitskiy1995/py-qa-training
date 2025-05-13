@@ -11,6 +11,11 @@ class ContactHelper:
 
     contacts_cache = None
 
+    def count(self):
+        wd = self.app.wd
+        return len(wd.find_elements(By.NAME, "selected[]"))
+
+
     def create_contact(self, contact):
         wd = self.app.wd
         self.open_add_contact_page()
@@ -58,8 +63,11 @@ class ContactHelper:
     def return_to_home_page(self):
         self.app.wait_for_element(By.LINK_TEXT, "home page").click()
 
-
     def delete_first_contact(self):
+        wd = self.app.wd
+        self.delete_contact_by_index(0)
+
+    def delete_contact_by_index(self, index):
         wd = self.app.wd
         if not self.is_contact_exist():
             self.open_add_contact_page()
@@ -70,17 +78,27 @@ class ContactHelper:
                 home_phone="+7999999999",
                 email="johnsmith@gmail.com"
             ))
-        self.app.wait_for_element(By.NAME, "selected[]").click()
+        self.select_contact_by_index(index)
         self.app.wait_for_element(By.XPATH, "//input[@value='Delete']").click()
         self.contacts_cache = None
 
 
+    def select_contact_by_index(self, index):
+        wd = self.app.wd
+        wd.find_elements(By.XPATH, "//img[@title='Edit']")[index].click()
+
+
     def edit_first_contact(self, contact):
+        wd = self.app.wd
+        wd.edit_contact_by_index(contact, 0)
+
+
+    def edit_contact_by_index(self, contact, index):
         wd = self.app.wd
         if not self.is_contact_exist():
             self.open_add_contact_page()
             self.create_contact(contact)
-        self.app.wait_for_element(By.XPATH, "//img[@title='Edit']").click()
+        self.select_contact_by_index(index)
         self.fill_contact_form(contact)
         self.app.wait_for_element(By.XPATH, "//input[@value='Update']").click()
         self.contacts_cache = None

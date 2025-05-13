@@ -36,11 +36,21 @@ class GroupHelper:
 
     def delete_first_group(self):
         wd = self.app.wd
+        self.delete_group_by_index(0)
+
+
+    def select_group_by_index(self, index):
+        wd = self.app.wd
+        wd.find_elements(By.NAME, "selected[]")[index].click()
+
+
+    def delete_group_by_index(self, index):
+        wd = self.app.wd
         self.open_group_page()
         if not self.is_group_exist():
             self.open_new_group_page()
             self.create(Group(name="New group", header="New header"))
-        self.app.wait_for_element(By.NAME, "selected[]").click()
+        self.select_group_by_index(index)
         self.app.wait_for_element(By.NAME, "delete").click()
         self.return_to_groups_page()
         self.group_cache = None
@@ -52,13 +62,18 @@ class GroupHelper:
         return len(wd.find_elements(By.NAME, "selected[]"))
 
 
-    def edit_group(self, group):
+    def edit_first_group(self):
+        wd = self.app.wd
+        self.edit_group_by_index(0)
+
+
+    def edit_group_by_index(self, group, index):
         wd = self.app.wd
         self.open_group_page()
         if not self.is_group_exist():
             self.open_new_group_page()
             self.create(group)
-        self.app.wait_for_element(By.NAME, "selected[]").click()
+        self.select_group_by_index(index)
         self.app.wait_for_element(By.NAME, "edit").click()
         self.fill_group_form(group)
         # submit group creation
