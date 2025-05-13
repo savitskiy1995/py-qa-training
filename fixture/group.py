@@ -33,3 +33,10 @@ class GroupHelper:
     def open_group_page(self):
         wd = self.app.wd
         self.app.wait_for_element(By.LINK_TEXT, "groups").click()
+
+    def delete_first_group(self):
+        wd = self.app.wd
+        self.open_group_page()
+        self.app.wait_for_element(By.NAME, "selected[]").click()
+        self.app.wait_for_element(By.NAME, "delete").click()
+        self.return_to_groups_page()
