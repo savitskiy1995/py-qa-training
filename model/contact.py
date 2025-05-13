@@ -12,7 +12,6 @@ class Contact:
         self.id = id
 
 
-
     def __repr__(self):
         return "%s:%s %s" % (self.id, self.firstname, self.lastname)
 

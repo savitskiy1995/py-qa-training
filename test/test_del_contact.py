@@ -6,4 +6,3 @@ def test_add_contact(app):
     old_contacts[0:1] = []
     assert old_contacts == new_contacts
 
-##

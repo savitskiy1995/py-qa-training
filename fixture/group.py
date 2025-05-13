@@ -5,6 +5,8 @@ from model.group import Group
 
 class GroupHelper:
 
+    group_cache = None
+
     def __init__(self, app):
         self.app = app
 
@@ -23,7 +25,7 @@ class GroupHelper:
         # submit group creation
         self.app.wait_for_element(By.NAME, "submit").click()
         self.return_to_groups_page()
-
+        self.group_cache = None
 
     def open_group_page(self):
         wd = self.app.wd
@@ -41,6 +43,13 @@ class GroupHelper:
         self.app.wait_for_element(By.NAME, "selected[]").click()
         self.app.wait_for_element(By.NAME, "delete").click()
         self.return_to_groups_page()
+        self.group_cache = None
+
+
+    def count(self):
+        wd = self.app.wd
+        self.open_group_page()
+        return len(wd.find_elements(By.NAME, "selected[]"))
 
 
     def edit_group(self, group):
@@ -55,9 +64,12 @@ class GroupHelper:
         # submit group creation
         self.app.wait_for_element(By.NAME, "update").click()
         self.return_to_groups_page()
+        self.group_cache = None
+
 
     def open_new_group_page(self):
         self.app.wait_for_element(By.NAME, "new").click()
+
 
     def fill_group_form(self, group):
         group_name = self.app.wait_for_element(By.NAME, "group_name")
@@ -77,15 +89,16 @@ class GroupHelper:
 
 
     def get_group_list(self):
-        wd = self.app.wd
-        self.open_group_page()
-        groups = []
-        for element in wd.find_elements(By.CSS_SELECTOR, "span.group"):
-            # Получаем input внутри span
-            input_element = element.find_element(By.NAME, "selected[]")
-            # Значение атрибута value (ID группы)
-            id = input_element.get_attribute("value")
-            # Текст из title атрибута (название группы)
-            name = input_element.get_attribute("title").replace("Select (", "").replace(")", "")
-            groups.append(Group(name=name, id=id))
-        return groups
+        if self.group_cache is None:
+            wd = self.app.wd
+            self.open_group_page()
+            self.group_cache = []
+            for element in wd.find_elements(By.CSS_SELECTOR, "span.group"):
+                # Получаем input внутри span
+                input_element = element.find_element(By.NAME, "selected[]")
+                # Значение атрибута value (ID группы)
+                id = input_element.get_attribute("value")
+                # Текст из title атрибута (название группы)
+                name = input_element.get_attribute("title").replace("Select (", "").replace(")", "")
+                self.group_cache.append(Group(name=name, id=id))
+        return list(self.group_cache)
