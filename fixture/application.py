@@ -10,6 +10,7 @@ from fixture.group import GroupHelper
 from fixture.session import SessionHelper
 
 
+
 class Application:
     def __init__(self):
         self.wd = WebDriver()
