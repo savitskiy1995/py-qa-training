@@ -1,6 +1,8 @@
 import re
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+import time
 
 from model.contact import Contact
 
@@ -39,10 +41,10 @@ class ContactHelper:
         if contact.lastname:
             lastname_field.send_keys(contact.lastname)
 
-        company_field = self.app.wait_for_element(By.NAME, "company")
-        company_field.clear()
-        if contact.company:
-            company_field.send_keys(contact.company)
+        #company_field = self.app.wait_for_element(By.NAME, "company")
+        #company_field.clear()
+        #if contact.company:
+        #    company_field.send_keys(contact.company)
 
         home_phone_field = self.app.wait_for_element(By.NAME, "home")
         home_phone_field.clear()
@@ -54,12 +56,35 @@ class ContactHelper:
         if contact.email:
             email_field.send_keys(contact.email)
 
+    def add_contact_to_group(self, contact_id, group_id):
+        wd = self.app.wd
+        self.open_contacts_homepage()
+        wd.find_element_by_css_selector("input[value='%s']" % contact_id).click()
+        select = Select(wd.find_element_by_css_selector("select[name='to_group']"))
+        select.select_by_value('%s' % group_id)
+        wd.find_element_by_css_selector("input[value='Add to']").click()
+        wd.find_element_by_css_selector("a[href='./?group=%s']" % group_id).click()
+
+    def delete_contact_from_group(self, group_id):
+        wd = self.app.wd
+        self.open_contacts_homepage()
+        select = Select(wd.find_element_by_css_selector("select[name='group']"))
+        select.select_by_value('%s' % group_id)
+        wd.find_element_by_css_selector("input[name='selected[]']").click()
+        wd.find_element_by_css_selector("input[name='remove']").click()
+        wd.find_element_by_css_selector("a[href='./?group=%s']" % group_id).click()
 
     def open_add_contact_page(self):
         wd = self.app.wd
         if wd.current_url.endswith("/edit.php") and len (wd.find_elements(By.NAME, "Enter")) > 0:
             return
         self.app.wait_for_element(By.LINK_TEXT, "add new").click()
+
+
+    def open_contacts_homepage(self):
+        wd = self.app.wd
+        if not wd.current_url.endswith("addressbook/"):
+            wd.find_element(By.LINK_TEXT,"home").click()
 
 
     def return_to_home_page(self):
