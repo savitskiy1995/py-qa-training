@@ -29,6 +29,9 @@ class ContactHelper:
 
 
     def open_add_contact_page(self):
+        wd = self.app.wd
+        if wd.current_url.endswith("/edit.php") and len (wd.find_elements(By.NAME, "Enter")) > 0:
+            return
         self.app.wait_for_element(By.LINK_TEXT, "add new").click()
 
 
