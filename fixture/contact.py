@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
 
-from model import contact
 from model.contact import Contact
 
 
@@ -19,13 +18,31 @@ class ContactHelper:
         self.app.wait_for_element(By.XPATH, "//div[@id='content']/form/input[20]").click()
         self.return_to_home_page()
 
-
     def fill_contact_form(self, contact):
-        self.app.wait_for_element(By.NAME, "firstname").send_keys(contact.firstname)
-        self.app.wait_for_element(By.NAME, "lastname").send_keys(contact.lastname)
-        self.app.wait_for_element(By.NAME, "company").send_keys(contact.company)
-        self.app.wait_for_element(By.NAME, "home").send_keys(contact.home_phone)
-        self.app.wait_for_element(By.NAME, "email").send_keys(contact.email)
+        firstname_field = self.app.wait_for_element(By.NAME, "firstname")
+        firstname_field.clear()
+        if contact.firstname:
+            firstname_field.send_keys(contact.firstname)
+
+        lastname_field = self.app.wait_for_element(By.NAME, "lastname")
+        lastname_field.clear()
+        if contact.lastname:
+            lastname_field.send_keys(contact.lastname)
+
+        company_field = self.app.wait_for_element(By.NAME, "company")
+        company_field.clear()
+        if contact.company:
+            company_field.send_keys(contact.company)
+
+        home_phone_field = self.app.wait_for_element(By.NAME, "home")
+        home_phone_field.clear()
+        if contact.home_phone:
+            home_phone_field.send_keys(contact.home_phone)
+
+        email_field = self.app.wait_for_element(By.NAME, "email")
+        email_field.clear()
+        if contact.email:
+            email_field.send_keys(contact.email)
 
 
     def open_add_contact_page(self):
@@ -61,8 +78,26 @@ class ContactHelper:
             self.create_contact(contact)
         self.app.wait_for_element(By.XPATH, "//img[@title='Edit']").click()
         self.fill_contact_form(contact)
-
+        self.app.wait_for_element(By.XPATH, "//input[@value='Update']").click()
+        self.return_to_home_page()
 
     def is_contact_exist(self):
         wd = self.app.wd
         return len(wd.find_elements(By.NAME, "selected[]")) > 0
+
+    def get_contact_list(self):
+        wd = self.app.wd
+        contacts = []
+        self.app.wait_for_element(By.NAME, "entry")
+        for element in wd.find_elements(By.NAME, "entry"):
+            cells = element.find_elements(By.TAG_NAME, "td")
+            id = element.find_element(By.TAG_NAME, "input").get_attribute("value")
+            last_name = cells[1].text
+            first_name = cells[2].text
+            address = cells[3].text
+            email = cells[4].text
+            phone = cells[5].text
+            contacts.append(Contact(id=id, firstname=first_name, lastname=last_name,
+                                              address=address, email=email,
+                                              home_phone=phone))
+        return contacts

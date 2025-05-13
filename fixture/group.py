@@ -62,13 +62,30 @@ class GroupHelper:
     def fill_group_form(self, group):
         group_name = self.app.wait_for_element(By.NAME, "group_name")
         group_name.click()
-        group_name.send_keys(group.name)
+        group_name.clear()
+        group_name.send_keys(group.name if group.name else "")
+
         group_header = self.app.wait_for_element(By.NAME, "group_header")
         group_header.click()
         group_header.clear()
-        group_header.send_keys(group.header)
+        group_header.send_keys(group.header if group.header else "")
 
 
     def is_group_exist(self):
         wd = self.app.wd
         return len(wd.find_elements(By.NAME, "selected[]")) > 0
+
+
+    def get_group_list(self):
+        wd = self.app.wd
+        self.open_group_page()
+        groups = []
+        for element in wd.find_elements(By.CSS_SELECTOR, "span.group"):
+            # Получаем input внутри span
+            input_element = element.find_element(By.NAME, "selected[]")
+            # Значение атрибута value (ID группы)
+            id = input_element.get_attribute("value")
+            # Текст из title атрибута (название группы)
+            name = input_element.get_attribute("title").replace("Select (", "").replace(")", "")
+            groups.append(Group(name=name, id=id))
+        return groups
