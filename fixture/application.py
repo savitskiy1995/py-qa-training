@@ -18,6 +18,14 @@ class Application:
         self.group = GroupHelper(self)
         self.contact = ContactHelper(self)
 
+
+    def is_valid(self):
+        try:
+            self.wd.current_url
+            return True
+        except:
+            return False
+
     def wait_for_element(self, by, value, timeout=10):
         try:
             return WebDriverWait(self.wd, timeout).until(
