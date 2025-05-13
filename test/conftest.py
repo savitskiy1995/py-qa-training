@@ -1,6 +1,8 @@
 import json
 import pytest
 import os.path
+import importlib
+import jsonpickle
 from fixture.application import Application
 
 fixture = None
@@ -17,7 +19,7 @@ def app(request):
             target = json.load(f)
     if fixture is None or not fixture.is_valid():
         fixture = Application(browser=browser, base_url=target['baseUrl'])
-    fixture.session.ensure_login(username="admin", password="secret")
+    fixture.session.ensure_login(username=target['username'], password=target['password'])
     return fixture
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,3 +32,22 @@ def stop():
 def pytest_addoption(parser):
     parser.addoption("--browser", action="store", default="chrome")
     parser.addoption("--target", action="store", default="target.json")
+
+
+def pytest_generate_tests(metafunc):
+    for fixture in metafunc.fixturenames:
+        if fixture.startswith("data_"):
+            testdata = load_from_module(fixture[5:])
+            metafunc.parametrize(fixture, testdata, ids=[str(x) for x in testdata])
+        elif fixture.startswith("json_"):
+            testdata = load_from_json(fixture[5:])
+            metafunc.parametrize(fixture, testdata, ids=[str(x) for x in testdata])
+
+def load_from_module(module):
+    return importlib.import_module("data.%s" % module).testdata
+
+def load_from_json(file):
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Поднимаемся в корень
+    file_path = os.path.join(base_path, "data", f"{file}.json")  # Ищем в корне/data/file.json
+    with open(file_path) as f:
+        return jsonpickle.decode(f.read())
