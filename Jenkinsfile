@@ -5,14 +5,14 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                sh 'pip install -r requirements.txt || true'
-                sh 'pip install pytest pytest-html'
+                bat 'pip install -r requirements.txt || exit 0'
+                bat 'pip install pytest pytest-html'
             }
         }
 
         stage('Run tests') {
             steps {
-                sh 'pytest test/ --html=report.html --self-contained-html'
+                bat 'pytest test/ --html=report.html --self-contained-html'
             }
         }
 
