@@ -4,32 +4,32 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/savitskiy1995/py-qa-training.git', branch: 'main'
+                git 'https://github.com/savitskiy1995/py-qa-training.git'
             }
         }
 
-        stage('Set up Python') {
+        stage('Install dependencies') {
             steps {
-                bat 'python --version'
-                bat 'python -m venv venv'
-                bat 'call venv\\Scripts\\activate && pip install -r requirements.txt'
-                bat 'call venv\\Scripts\\activate && pip install pytest pytest-html pytest-junitxml'
+                sh 'pip install -r requirements.txt || true'
+                sh 'pip install pytest pytest-html'
             }
         }
 
-        stage('Run Tests') {
+        stage('Run tests') {
             steps {
-                bat 'call venv\\Scripts\\activate && python -m pytest --junitxml=test-results.xml --html=report.html'
+                sh 'pytest test/ --html=report.html --self-contained-html'
             }
         }
 
-        stage('Publish Reports') {
+        stage('Publish Report') {
             steps {
-                junit 'test-results.xml'
                 publishHTML(target: [
-                    reportDir: '',
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '.',
                     reportFiles: 'report.html',
-                    reportName: 'Pytest Report'
+                    reportName: 'Test Report'
                 ])
             }
         }
