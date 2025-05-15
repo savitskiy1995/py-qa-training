@@ -2,11 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/savitskiy1995/py-qa-training.git'
-            }
-        }
 
         stage('Install dependencies') {
             steps {
