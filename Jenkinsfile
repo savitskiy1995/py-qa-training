@@ -8,35 +8,28 @@ pipeline {
             }
         }
 
-        stage('Set up Python 3.13') {
+        stage('Set up Python') {
             steps {
-                sh 'python3.13 --version'
-                sh 'python3.13 -m venv venv'
-                sh 'source venv/bin/activate && pip install -r requirements.txt'
-                // Установка дополнительных пакетов для отчётов
-                sh 'source venv/bin/activate && pip install pytest-html pytest-junitxml'
+                bat 'python --version'  // Для Windows используйте 'bat' вместо 'sh'
+                bat 'python -m venv venv'
+                bat 'call venv\\Scripts\\activate && pip install -r requirements.txt'
+                bat 'call venv\\Scripts\\activate && pip install pytest pytest-html pytest-junitxml'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'source venv/bin/activate && python -m pytest --junitxml=test-results.xml --html=report.html'
+                bat 'call venv\\Scripts\\activate && python -m pytest --junitxml=test-results.xml --html=report.html'
             }
         }
 
-        stage('Publish Test Results') {
+        stage('Publish Reports') {
             steps {
-                // Публикация результатов в формате JUnit для Jenkins
                 junit 'test-results.xml'
-                
-                // Публикация HTML отчёта (требуется установленный плагин HTML Publisher)
                 publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
                     reportDir: '',
                     reportFiles: 'report.html',
-                    reportName: 'Pytest HTML Report'
+                    reportName: 'HTML Report'
                 ])
             }
         }
