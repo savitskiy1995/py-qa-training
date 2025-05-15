@@ -10,7 +10,7 @@ pipeline {
 
         stage('Set up Python') {
             steps {
-                bat 'python --version'  // Для Windows используйте 'bat' вместо 'sh'
+                bat 'python --version'
                 bat 'python -m venv venv'
                 bat 'call venv\\Scripts\\activate && pip install -r requirements.txt'
                 bat 'call venv\\Scripts\\activate && pip install pytest pytest-html pytest-junitxml'
@@ -29,7 +29,7 @@ pipeline {
                 publishHTML(target: [
                     reportDir: '',
                     reportFiles: 'report.html',
-                    reportName: 'HTML Report'
+                    reportName: 'Pytest Report'
                 ])
             }
         }
